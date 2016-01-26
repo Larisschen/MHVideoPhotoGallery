@@ -127,4 +127,14 @@ typedef NS_ENUM(NSUInteger, MHYoutubeThumbQuality) {
                                   withTitle:(BOOL)withTitle
                                successBlock:(void (^)(NSArray *MHGalleryObjects,NSError *error))succeedBlock;
 
+/*!
+ * @brief convert duration from Youtube format to NSInteger
+ *
+ * @param duration duration's video
+ *
+ * @return return  totalSeconds as NSInteger
+ **/
+- (NSInteger)integerFromYoutubeDurationString:(NSString*)duration;
+
+
 @end

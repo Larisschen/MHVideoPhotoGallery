@@ -289,7 +289,7 @@
         succeedBlock(image,[dict[URL] integerValue],nil);
     }else{
         NSString *videoID = [[URL componentsSeparatedByString:@"?v="] lastObject];
-        NSString *infoURL = [NSString stringWithFormat:MHYoutubeInfoBaseURL,videoID];
+        NSString *infoURL = [NSString stringWithFormat:MHYoutubeInfoBaseURL, videoID, MHYoutubeAPIKey];
         NSMutableURLRequest *httpRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:infoURL]
                                                                    cachePolicy:NSURLRequestUseProtocolCachePolicy
                                                                timeoutInterval:10];
@@ -303,14 +303,19 @@
                                                                                                   error:&error];
                                        dispatch_async(dispatch_get_main_queue(), ^(void){
                                            if (jsonData.count) {
+                                               NSLog(@"JSON \n%@",jsonData);
                                                NSMutableDictionary *dictToSave = [self durationDict];
-                                               dictToSave[URL] = @([jsonData[@"data"][@"duration"] integerValue]);
+                                               NSString *youtubeDuration = jsonData[@"items"][0][@"contentDetails"][@"duration"];
+                                               NSInteger intDuration = [self integerFromYoutubeDurationString:youtubeDuration];
+                                               NSLog(@"Duration %@",youtubeDuration);
+                                               dictToSave[URL] = @(intDuration);
+//                                               dictToSave[URL] = @([jsonData[@"data"][@"duration"] integerValue]);
                                                [self setObjectToUserDefaults:dictToSave];
                                                NSString *thumbURL = NSString.new;
                                                if (self.youtubeThumbQuality == MHYoutubeThumbQualityHQ) {
-                                                   thumbURL = jsonData[@"data"][@"thumbnail"][@"hqDefault"];
+                                                   thumbURL = jsonData[@"items"][0][@"snippet"][@"thumbnails"][@"high"][@"url"];
                                                }else if (self.youtubeThumbQuality == MHYoutubeThumbQualitySQ){
-                                                   thumbURL = jsonData[@"data"][@"thumbnail"][@"sqDefault"];
+                                                   thumbURL = jsonData[@"items"][0][@"snippet"][@"thumbnails"][@"default"][@"url"];
                                                }
                                                [SDWebImageManager.sharedManager downloadImageWithURL:[NSURL URLWithString:thumbURL]
                                                                                              options:SDWebImageContinueInBackground
@@ -321,7 +326,7 @@
                                                                                                [SDImageCache.sharedImageCache storeImage:image
                                                                                                                                   forKey:URL];
                                                                                                
-                                                                                               succeedBlock(image,[jsonData[@"data"][@"duration"] integerValue],nil);
+                                                                                               succeedBlock(image,intDuration,nil);
                                                                                            }];
                                            }
                                        });
@@ -469,6 +474,42 @@
         return [NSString stringWithFormat:@"-%@",string];
     }
     return string;
+}
+
+- (NSInteger)integerFromYoutubeDurationString:(NSString*)duration{
+    
+    if(duration == nil){
+        return 0;
+    }
+    
+    
+    NSString *startConst = @"PT";
+    NSString *hoursConst = @"H";
+    NSString *minutesConst = @"M";
+    NSString *secondsConst = @"S";
+    NSString *hours = nil;
+    NSString *minutes = nil;
+    NSString *seconds = nil;
+    NSInteger totalSeconds = 0;
+    
+    NSString *clean = [duration componentsSeparatedByString:startConst][1];
+    
+    if([clean containsString:hoursConst]){
+        hours = [clean componentsSeparatedByString:hoursConst][0];
+        clean = [clean componentsSeparatedByString:hoursConst][1];
+        totalSeconds = [hours integerValue]*3600;
+    }
+    if([clean containsString:minutesConst]){
+        minutes = [clean componentsSeparatedByString:minutesConst][0];
+        clean = [clean componentsSeparatedByString:minutesConst][1];
+        totalSeconds = totalSeconds + [minutes integerValue]*60;
+    }
+    if([clean containsString:secondsConst]){
+        seconds = [clean componentsSeparatedByString:secondsConst][0];
+        totalSeconds = totalSeconds + [seconds integerValue];
+    }
+    
+    return totalSeconds;
 }
 
 @end

@@ -28,6 +28,7 @@
 @property (nonatomic, strong)          MHScrollViewLabel *titleLabel;
 @property (nonatomic, strong)          MHScrollViewLabel *descriptionLabel;
 @property (nonatomic)                  NSInteger pageIndex;
+@property (nonatomic)                  BOOL didShareItemSuccessfully;
 @property (nonatomic, strong)          UIPageViewController *pageViewController;
 @property (nonatomic, strong)          UIImageView *presentingFromImageView;
 @property (nonatomic, strong)          UIImageView *dismissFromImageView;
@@ -43,7 +44,6 @@
 -(void)playStopButtonPressed;
 -(void)changeToPauseButton;
 -(void)changeToPlayButton;
--(void)reloadData;
 @end
 
 @interface MHImageViewController : UIViewController<UIScrollViewDelegate,UIGestureRecognizerDelegate>

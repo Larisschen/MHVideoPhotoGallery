@@ -52,6 +52,7 @@ extern UIImage  *MHGalleryImage(NSString *imageName);
 extern UIView  *MHStatusBar(void);
 extern BOOL     MHShouldShowStatusBar(void);
 
+extern NSString *const MHYoutubeAPIKey;
 extern NSString *const MHYoutubeChannel;
 extern NSString *const MHGalleryViewModeShare;
 extern NSString *const MHVimeoVideoBaseURL;
