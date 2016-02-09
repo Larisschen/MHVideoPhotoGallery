@@ -829,7 +829,7 @@
                 MHImageURL *imageURL = [MHImageURL.alloc initWithURL:item.URLString image:nil];
                 [weakSelf addDataToDownloadArray:imageURL];
             }else{
-                [MHGallerySharedManager.sharedManager getURLForMediaPlayer:item.URLString successBlock:^(NSURL *URL, NSError *error) {
+                [MHGallerySharedManager.sharedManager getURLForMediaPlayer:item.URLString successBlock:^(NSURL *URL,NSDictionary *restrictionsDictionary, NSError *error) {
                     NSURLSession *session = [NSURLSession sessionWithConfiguration:NSURLSessionConfiguration.defaultSessionConfiguration];
                     
                     [self.sessions addObject:session];

@@ -100,7 +100,7 @@ typedef NS_ENUM(NSUInteger, MHYoutubeThumbQuality) {
  */
 
 -(void)getURLForMediaPlayer:(NSString*)URLString
-               successBlock:(void (^)(NSURL *URL,NSError *error))succeedBlock;
+               successBlock:(void (^)(NSURL *URL,NSDictionary *restrictionsDictionary,NSError *error))succeedBlock;
 
 -(void)getVimeoURLforMediaPlayer:(NSString*)URL
                     successBlock:(void (^)(NSURL *URL,NSError *error))succeedBlock;
@@ -111,7 +111,7 @@ typedef NS_ENUM(NSUInteger, MHYoutubeThumbQuality) {
  *  @param succeedBlock you will get the absolute URL
  */
 -(void)getYoutubeURLforMediaPlayer:(NSString*)URL
-                      successBlock:(void (^)(NSURL *URL,NSError *error))succeedBlock;
+                      successBlock:(void (^)(NSURL *URL,NSDictionary *restrictionsDictionary, NSError *error))succeedBlock;
 
 -(void)getImageFromAssetLibrary:(NSString*)urlString
                       assetType:(MHAssetImageType)type

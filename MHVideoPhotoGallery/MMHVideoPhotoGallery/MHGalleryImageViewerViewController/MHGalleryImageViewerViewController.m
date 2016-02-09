@@ -1051,6 +1051,42 @@
                      forState:UIControlStateNormal];
 }
 
+-(void)changeToRestrictionStateWithText:(NSString *)text{
+    self.viewController.toolbar.hidden = YES;
+    UIWebView *web = [[UIWebView alloc] initWithFrame:CGRectMake(self.imageView.frame.origin.x, self.imageView.frame.origin.y + 68, self.imageView.frame.size.width, self.imageView.frame.size.height)];
+    web.backgroundColor = [UIColor colorWithRed:0.5 green:0.5 blue:0.5 alpha:0.8];
+    [self.imageView addSubview:web];
+//    [web loadHTMLString:text baseURL:nil];
+    [web loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@&feature=player_embedded",text]]]];
+}
+
+
+-(void)openLinkWithYoutube{
+    
+    if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:self.item.URLString]]) {
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:self.item.URLString]];
+    }
+}
+
+-(void)addYTButton{
+
+    if (self.playButton) {
+        [self.playButton removeFromSuperview];
+    }
+    self.playButton = [UIButton.alloc initWithFrame:self.viewController.view.bounds];
+    self.playButton.frame = CGRectMake(self.viewController.view.frame.size.width/2-36, self.viewController.view.frame.size.height/2-36, 72, 72);
+    [self.playButton setImage:MHGalleryImage(@"playButton") forState:UIControlStateNormal];
+//    [self.playButton setBackgroundColor:[UIColor colorWithRed:0 green:0 blue:0 alpha:0.5]];
+    self.playButton.tag =508;
+    [self.playButton addTarget:self action:@selector(openLinkWithYoutube) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:self.playButton];
+    
+    UILabel *textButton = [[UILabel alloc] initWithFrame:CGRectMake(self.viewController.view.frame.size.width/2 - 70, self.viewController.view.frame.size.height/2 + 30, 200, 40)];
+    textButton.text = @"Mit Youtube öffnen";
+    textButton.textColor = [UIColor whiteColor];
+    [self.view addSubview:textButton];
+}
+
 -(void)viewDidAppear:(BOOL)animated{
     [super viewDidAppear:animated];
     
@@ -1061,9 +1097,15 @@
             [weakSelf autoPlayVideo];
             return;
         }
-        [[MHGallerySharedManager sharedManager] getURLForMediaPlayer:self.item.URLString successBlock:^(NSURL *URL, NSError *error) {
-            if (error || URL == nil) {
-                [weakSelf changePlayButtonToUnPlay];
+        [[MHGallerySharedManager sharedManager] getURLForMediaPlayer:self.item.URLString successBlock:^(NSURL *URL,NSDictionary *restrictions, NSError *error) {
+            if (error || URL == nil || restrictions != nil) {
+                if (restrictions != nil) {
+                    [self addYTButton];
+                    self.viewController.playStopBarButton.enabled = NO;
+                    [self.viewController.playStopBarButton setTintColor:[UIColor clearColor]];
+                }else{
+                    [weakSelf changePlayButtonToUnPlay];
+                }
             }else{
                 [weakSelf addMoviePlayerToViewWithURL:URL];
                 [weakSelf autoPlayVideo];

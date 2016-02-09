@@ -139,7 +139,7 @@
 }
 
 -(void)getYoutubeURLforMediaPlayer:(NSString*)URL
-                      successBlock:(void (^)(NSURL *URL,NSError *error))succeedBlock{
+                      successBlock:(void (^)(NSURL *URL,NSDictionary *restrictionsDictionary,NSError *error))succeedBlock{
     
     NSString *videoID = [[URL componentsSeparatedByString:@"?v="] lastObject];
     NSURL *videoInfoURL = [NSURL URLWithString:[NSString stringWithFormat:MHYoutubePlayBaseURL, videoID ?: @"", [self languageIdentifier]]];
@@ -153,18 +153,44 @@
                                dispatch_async(dispatch_get_main_queue(), ^(void){
                                    NSURL *playURL = [self getYoutubeURLWithData:data];
                                    if (playURL) {
-                                       succeedBlock(playURL,nil);
+                                       succeedBlock(playURL,nil,nil);
                                    }else{
-                                       succeedBlock(nil,nil);
+                                       NSDictionary*reasonFail = [self reasonForYoutubeRestrictionWithData:data];
+                                       if (reasonFail[@"status"] == [NSNumber numberWithInt:0]) {
+                                           succeedBlock(nil,reasonFail,nil);
+                                       }
                                    }
                                });
                            }];
+}
+
+-(NSDictionary *)reasonForYoutubeRestrictionWithData:(NSData *)data{
+    NSString *videoData = [NSString.alloc initWithData:data encoding:NSASCIIStringEncoding];
+    
+    NSDictionary *video = MHDictionaryForQueryString(videoData);
+    //get infos here -> "status = ok OR status = fail (reason = This video contains content from VEVO. It is restricted from playback on certain sites.<br/><u><a href='http://www.youtube.com/watch?v=E8gmARGvPlI&feature=player_embedded' target='_blank'>Watch on YouTube</a></u>";)"
+    NSLog(@"--> status: %@", video[@"status"]);
+    NSLog(@"--> reason: %@", video[@"reason"]);
+    NSNumber *videoStatus = [NSNumber numberWithInt:0];
+    if ([video[@"status"] isEqualToString:@"ok"]) {
+        videoStatus = [NSNumber numberWithInt:1];
+    }else if ([video[@"status"] isEqualToString:@"fail"]){
+        videoStatus = [NSNumber numberWithInt:0];
+    }
+    
+    NSDictionary *restrictionsDic = @{@"status" : videoStatus,
+                                      @"reason": video[@"reason"]};
+    
+    return restrictionsDic;
 }
 
 - (NSURL *)getYoutubeURLWithData:(NSData *)data{
     NSString *videoData = [NSString.alloc initWithData:data encoding:NSASCIIStringEncoding];
     
     NSDictionary *video = MHDictionaryForQueryString(videoData);
+    //get infos here -> "status = ok OR status = fail (reason = This video contains content from VEVO. It is restricted from playback on certain sites.<br/><u><a href='http://www.youtube.com/watch?v=E8gmARGvPlI&feature=player_embedded' target='_blank'>Watch on YouTube</a></u>";)"
+    NSLog(@"--> status: %@", video[@"status"]);
+    NSLog(@"--> reason: %@", video[@"reason"]);
     NSArray *videoURLS = [video[@"url_encoded_fmt_stream_map"] componentsSeparatedByString:@","];
     NSMutableDictionary *streamURLs = NSMutableDictionary.new;
     for (NSString *videoURL in videoURLS){
@@ -203,18 +229,18 @@
 }
 
 -(void)getURLForMediaPlayer:(NSString*)URLString
-               successBlock:(void (^)(NSURL *URL,NSError *error))succeedBlock{
+               successBlock:(void (^)(NSURL *URL,NSDictionary *restrictions,NSError *error))succeedBlock{
     
     if ([URLString rangeOfString:@"vimeo.com"].location != NSNotFound) {
         [self getVimeoURLforMediaPlayer:URLString successBlock:^(NSURL *URL, NSError *error) {
-            succeedBlock(URL,error);
+            succeedBlock(URL,nil,error);
         }];
     }else if([URLString rangeOfString:@"youtube.com"].location != NSNotFound) {
-        [self getYoutubeURLforMediaPlayer:URLString successBlock:^(NSURL *URL, NSError *error) {
-            succeedBlock(URL,error);
+        [self getYoutubeURLforMediaPlayer:URLString successBlock:^(NSURL *URL,NSDictionary *restrictions, NSError *error) {
+            succeedBlock(URL,restrictions,error);
         }];
     }else{
-        succeedBlock([NSURL URLWithString:URLString],nil);
+        succeedBlock([NSURL URLWithString:URLString],nil,nil);
     }
     
     
