@@ -169,8 +169,8 @@
     
     NSDictionary *video = MHDictionaryForQueryString(videoData);
     //get infos here -> "status = ok OR status = fail (reason = This video contains content from VEVO. It is restricted from playback on certain sites.<br/><u><a href='http://www.youtube.com/watch?v=E8gmARGvPlI&feature=player_embedded' target='_blank'>Watch on YouTube</a></u>";)"
-    NSLog(@"--> status: %@", video[@"status"]);
-    NSLog(@"--> reason: %@", video[@"reason"]);
+//    NSLog(@"--> status: %@", video[@"status"]);
+//    NSLog(@"--> reason: %@", video[@"reason"]);
     NSNumber *videoStatus = [NSNumber numberWithInt:0];
     if ([video[@"status"] isEqualToString:@"ok"]) {
         videoStatus = [NSNumber numberWithInt:1];
@@ -178,8 +178,7 @@
         videoStatus = [NSNumber numberWithInt:0];
     }
     
-    NSDictionary *restrictionsDic = @{@"status" : videoStatus,
-                                      @"reason": video[@"reason"]};
+    NSDictionary *restrictionsDic = @{@"status" : videoStatus};
     
     return restrictionsDic;
 }
@@ -189,8 +188,9 @@
     
     NSDictionary *video = MHDictionaryForQueryString(videoData);
     //get infos here -> "status = ok OR status = fail (reason = This video contains content from VEVO. It is restricted from playback on certain sites.<br/><u><a href='http://www.youtube.com/watch?v=E8gmARGvPlI&feature=player_embedded' target='_blank'>Watch on YouTube</a></u>";)"
-    NSLog(@"--> status: %@", video[@"status"]);
-    NSLog(@"--> reason: %@", video[@"reason"]);
+//    NSLog(@"--> status: %@", video[@"status"]);
+//    NSLog(@"--> reason: %@", video[@"reason"]);
+    
     NSArray *videoURLS = [video[@"url_encoded_fmt_stream_map"] componentsSeparatedByString:@","];
     NSMutableDictionary *streamURLs = NSMutableDictionary.new;
     for (NSString *videoURL in videoURLS){
